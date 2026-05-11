@@ -1,0 +1,35 @@
+-- ============================================
+-- SUBQUERIES
+-- ============================================
+
+-- Q28: Find medicines never dispensed
+-- Purpose: Identify slow-moving or unused medicines
+SELECT medicine_id, name, dosage_form, unit_price
+FROM medicines
+WHERE medicine_id NOT IN (
+    SELECT DISTINCT medicine_id 
+    FROM dispense_records
+)
+ORDER BY name ASC;
+
+-- Q29: Find patients who have more than 
+--      one prescription
+-- Purpose: Identify frequent patients
+SELECT patient_id, name, phone
+FROM patients
+WHERE patient_id IN (
+    SELECT patient_id
+    FROM prescriptions
+    GROUP BY patient_id
+    HAVING COUNT(prescription_id) > 1
+);
+
+-- Q30: Find medicines below average stock level
+-- Purpose: Advanced low stock analysis
+SELECT m.name, s.quantity AS current_stock
+FROM medicines m
+JOIN stock s ON m.medicine_id = s.medicine_id
+WHERE s.quantity < (
+    SELECT AVG(quantity) FROM stock
+)
+ORDER BY s.quantity ASC;

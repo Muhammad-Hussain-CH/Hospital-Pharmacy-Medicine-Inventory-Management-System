@@ -1,0 +1,49 @@
+-- ============================================
+-- UPDATE QUERIES
+-- ============================================
+
+-- Q22: Update stock when medicine is dispensed
+-- Purpose: Keep stock levels accurate after dispensing
+UPDATE stock
+SET quantity = quantity - 10
+WHERE medicine_id = 1;
+
+-- Verify the update
+SELECT m.name, s.quantity 
+FROM stock s 
+JOIN medicines m ON s.medicine_id = m.medicine_id
+WHERE s.medicine_id = 1;
+
+-- Q23: Update purchase order status to Delivered
+-- Purpose: Mark order as received and update records
+UPDATE purchase_orders
+SET status         = 'Delivered',
+    actual_delivery = CURDATE()
+WHERE order_id = 3;
+
+-- Verify the update
+SELECT order_id, status, actual_delivery 
+FROM purchase_orders 
+WHERE order_id = 3;
+
+-- Q24: Update medicine unit price
+-- Purpose: Price revision by management
+UPDATE medicines
+SET unit_price = 18.00
+WHERE medicine_id = 1;
+
+-- Verify the update
+SELECT medicine_id, name, unit_price 
+FROM medicines 
+WHERE medicine_id = 1;
+
+-- Q25: Deactivate a supplier
+-- Purpose: Mark supplier as inactive without deleting records
+UPDATE suppliers
+SET is_active = FALSE
+WHERE supplier_id = 3;
+
+-- Verify the update
+SELECT supplier_id, company_name, is_active 
+FROM suppliers 
+WHERE supplier_id = 3;

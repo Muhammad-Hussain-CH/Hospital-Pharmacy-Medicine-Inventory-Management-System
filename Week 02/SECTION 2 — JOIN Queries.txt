@@ -1,0 +1,149 @@
+-- ============================================
+-- JOIN QUERIES
+-- ============================================
+
+-- Q9: Medicine full details with category, 
+--     manufacturer and supplier (4 TABLE JOIN)
+-- Purpose: Complete medicine information in one query
+SELECT 
+    m.medicine_id,
+    m.name              AS medicine_name,
+    m.dosage_form,
+    m.strength,
+    m.unit_price,
+    m.expiry_date,
+    m.batch_no,
+    c.name              AS category,
+    mf.name             AS manufacturer,
+    s.company_name      AS supplier,
+    s.phone             AS supplier_phone
+FROM medicines m
+JOIN categories    c  ON m.category_id     = c.category_id
+JOIN manufacturers mf ON m.manufacturer_id = mf.manufacturer_id
+JOIN suppliers     s  ON m.supplier_id     = s.supplier_id
+ORDER BY m.name ASC;
+
+-- Q10: Medicine name with current stock level
+--      and stock status (2 TABLE JOIN)
+-- Purpose: Real-time stock dashboard
+SELECT 
+    m.name              AS medicine_name,
+    m.dosage_form,
+    m.expiry_date,
+    st.quantity         AS current_stock,
+    st.low_stock_threshold,
+    CASE 
+        WHEN m.expiry_date < CURDATE()       THEN 'Expired'
+        WHEN st.quantity = 0                  THEN 'Out of Stock'
+        WHEN st.quantity < st.low_stock_threshold THEN 'Low Stock'
+        ELSE                                       'In Stock'
+    END                 AS stock_status
+FROM medicines m
+JOIN stock st ON m.medicine_id = st.medicine_id
+ORDER BY stock_status ASC, m.name ASC;
+
+-- Q11: Purchase orders with supplier details (2 TABLE JOIN)
+-- Purpose: Complete procurement records
+SELECT 
+    po.order_id,
+    s.company_name      AS supplier,
+    s.contact_person,
+    s.phone             AS supplier_phone,
+    po.order_date,
+    po.expected_delivery,
+    po.actual_delivery,
+    po.status
+FROM purchase_orders po
+JOIN suppliers s ON po.supplier_id = s.supplier_id
+ORDER BY po.order_date DESC;
+
+-- Q12: Purchase order items with medicine and 
+--      supplier details (3 TABLE JOIN)
+-- Purpose: Detailed procurement line items
+SELECT 
+    po.order_id,
+    s.company_name      AS supplier,
+    m.name              AS medicine_name,
+    m.dosage_form,
+    poi.quantity        AS ordered_qty,
+    poi.unit_price,
+    (poi.quantity * poi.unit_price) AS line_total,
+    po.status
+FROM purchase_order_items poi
+JOIN purchase_orders po ON poi.order_id    = po.order_id
+JOIN medicines       m  ON poi.medicine_id = m.medicine_id
+JOIN suppliers       s  ON po.supplier_id  = s.supplier_id
+ORDER BY po.order_id ASC;
+
+-- Q13: Patient prescription history with 
+--      doctor details (3 TABLE JOIN)
+-- Purpose: Complete patient medical history
+SELECT 
+    p.patient_id,
+    p.name              AS patient_name,
+    p.phone             AS patient_phone,
+    d.name              AS doctor_name,
+    d.specialization,
+    rx.prescription_id,
+    rx.prescribed_date,
+    rx.notes
+FROM prescriptions rx
+JOIN patients p ON rx.patient_id = p.patient_id
+JOIN doctors  d ON rx.doctor_id  = d.doctor_id
+ORDER BY rx.prescribed_date DESC;
+
+-- Q14: Full prescription details — patient, doctor
+--      and all medicines prescribed (4 TABLE JOIN)
+-- Purpose: Complete prescription breakdown
+SELECT 
+    rx.prescription_id,
+    p.name              AS patient_name,
+    d.name              AS doctor_name,
+    d.specialization,
+    m.name              AS medicine_name,
+    m.dosage_form,
+    rxi.quantity        AS prescribed_qty,
+    rxi.instructions,
+    rx.prescribed_date
+FROM prescription_items rxi
+JOIN prescriptions rx ON rxi.prescription_id = rx.prescription_id
+JOIN patients      p  ON rx.patient_id       = p.patient_id
+JOIN doctors       d  ON rx.doctor_id        = d.doctor_id
+JOIN medicines     m  ON rxi.medicine_id     = m.medicine_id
+ORDER BY rx.prescription_id ASC, m.name ASC;
+
+-- Q15: Complete dispense history — patient, doctor,
+--      medicine, pharmacist (4 TABLE JOIN)
+-- Purpose: Full audit trail of all dispensing activity
+SELECT 
+    dr.dispense_id,
+    p.name              AS patient_name,
+    d.name              AS doctor_name,
+    m.name              AS medicine_name,
+    m.dosage_form,
+    dr.quantity         AS dispensed_qty,
+    dr.dispensed_at,
+    dr.dispensed_by     AS pharmacist,
+    dr.notes
+FROM dispense_records dr
+JOIN prescriptions rx ON dr.prescription_id = rx.prescription_id
+JOIN patients      p  ON rx.patient_id      = p.patient_id
+JOIN doctors       d  ON rx.doctor_id       = d.doctor_id
+JOIN medicines     m  ON dr.medicine_id     = m.medicine_id
+ORDER BY dr.dispensed_at DESC;
+
+-- Q16: Stock transaction audit log with 
+--      medicine details (2 TABLE JOIN)
+-- Purpose: Complete stock movement history
+SELECT 
+    st.transaction_id,
+    m.name              AS medicine_name,
+    m.dosage_form,
+    st.type             AS transaction_type,
+    st.quantity,
+    st.reason,
+    st.created_by,
+    st.created_at
+FROM stock_transactions st
+JOIN medicines m ON st.medicine_id = m.medicine_id
+ORDER BY st.created_at DESC;

@@ -1,0 +1,67 @@
+-- ============================================
+-- BASIC SELECT QUERIES
+-- ============================================
+
+-- Q1: View all medicines with full details
+-- Purpose: Most basic retrieval, shows all medicine records
+SELECT * FROM medicines;
+
+-- Q2: View all medicines sorted by name
+-- Purpose: Alphabetical listing for easy lookup
+SELECT medicine_id, name, dosage_form, 
+       strength, unit_price, expiry_date
+FROM medicines
+ORDER BY name ASC;
+
+-- Q3: Find all expired medicines
+-- Purpose: Critical alert query for pharmacy safety
+SELECT medicine_id, name, dosage_form, 
+       expiry_date, batch_no
+FROM medicines
+WHERE expiry_date < CURDATE()
+ORDER BY expiry_date ASC;
+
+-- Q4: Find medicines expiring within next 30 days
+-- Purpose: Proactive expiry alert for stock management
+SELECT medicine_id, name, dosage_form,
+       expiry_date,
+       DATEDIFF(expiry_date, CURDATE()) AS days_remaining
+FROM medicines
+WHERE expiry_date BETWEEN CURDATE() 
+                      AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+ORDER BY expiry_date ASC;
+
+-- Q5: Find all low stock medicines
+-- Purpose: Triggers reordering process
+SELECT s.medicine_id, m.name, 
+       s.quantity AS current_stock,
+       s.low_stock_threshold
+FROM stock s
+JOIN medicines m ON s.medicine_id = m.medicine_id
+WHERE s.quantity < s.low_stock_threshold
+ORDER BY s.quantity ASC;
+
+-- Q6: Find all active suppliers
+-- Purpose: Contact list for procurement
+SELECT supplier_id, company_name, 
+       contact_person, phone, city
+FROM suppliers
+WHERE is_active = TRUE
+ORDER BY company_name ASC;
+
+-- Q7: View all pending purchase orders
+-- Purpose: Track what is still awaited from suppliers
+SELECT order_id, supplier_id, 
+       order_date, expected_delivery, status
+FROM purchase_orders
+WHERE status = 'Pending'
+ORDER BY expected_delivery ASC;
+
+-- Q8: Count total medicines per category
+-- Purpose: Inventory summary by category
+SELECT c.name AS category, 
+       COUNT(m.medicine_id) AS total_medicines
+FROM categories c
+LEFT JOIN medicines m ON c.category_id = m.category_id
+GROUP BY c.category_id, c.name
+ORDER BY total_medicines DESC;

@@ -1,0 +1,26 @@
+-- ============================================
+-- INSERT QUERIES (Adding new records)
+-- ============================================
+
+-- Q31: Add a new medicine
+INSERT INTO medicines 
+(category_id, manufacturer_id, supplier_id, name, 
+ dosage_form, strength, unit_price, expiry_date, batch_no)
+VALUES 
+(1, 1, 1, 'Paracetamol', 'Tablet', '1000mg', 
+ 20.00, '2027-12-01', 'BT-016');
+
+-- Add its stock record immediately
+INSERT INTO stock (medicine_id, quantity, low_stock_threshold)
+VALUES (LAST_INSERT_ID(), 100, 20);
+
+-- Q32: Register a new patient
+INSERT INTO patients (name, phone, dob, gender, address)
+VALUES ('Sara Imran', '0300-1239999', '1993-07-20', 
+        'Female', 'House 5, F-7, Islamabad');
+
+-- Q33: Create a new prescription
+INSERT INTO prescriptions (patient_id, doctor_id, 
+                            prescribed_date, notes)
+VALUES (LAST_INSERT_ID(), 1, CURDATE(), 
+        'Routine checkup, mild fever');

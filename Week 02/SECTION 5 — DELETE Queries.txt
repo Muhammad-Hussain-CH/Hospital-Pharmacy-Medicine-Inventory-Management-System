@@ -1,0 +1,21 @@
+-- ============================================
+-- DELETE QUERIES
+-- ============================================
+
+-- Q26: Delete a purchase order item
+-- Purpose: Remove incorrect line item from order
+-- NOTE: Only works if order has no constraints blocking it
+DELETE FROM purchase_order_items
+WHERE item_id = 9;
+
+-- Verify the delete
+SELECT * FROM purchase_order_items 
+WHERE order_id = 5;
+
+-- Q27: Delete a cancelled purchase order
+-- Purpose: Clean up cancelled orders from records
+DELETE FROM purchase_orders
+WHERE order_id = 5 AND status = 'Cancelled';
+
+-- Verify the delete
+SELECT * FROM purchase_orders WHERE order_id = 5;

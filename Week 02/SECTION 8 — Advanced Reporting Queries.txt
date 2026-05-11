@@ -1,0 +1,37 @@
+-- ============================================
+-- ADVANCED REPORTING QUERIES
+-- ============================================
+
+-- Q34: Full pharmacy dashboard summary
+-- Purpose: Single query powering the dashboard page
+SELECT
+    (SELECT COUNT(*) FROM medicines)                        AS total_medicines,
+    (SELECT COUNT(*) FROM medicines 
+     WHERE expiry_date < CURDATE())                         AS expired_medicines,
+    (SELECT COUNT(*) FROM stock 
+     WHERE quantity < low_stock_threshold)                  AS low_stock_items,
+    (SELECT COUNT(*) FROM purchase_orders 
+     WHERE status = 'Pending')                              AS pending_orders,
+    (SELECT COUNT(*) FROM patients)                         AS total_patients,
+    (SELECT COUNT(*) FROM dispense_records 
+     WHERE DATE(dispensed_at) = CURDATE())                  AS dispensed_today;
+
+-- Q35: Expiry alert report — grouped urgency
+-- Purpose: Powers the expiry alerts page
+SELECT 
+    m.name              AS medicine_name,
+    m.batch_no,
+    s.quantity          AS stock_qty,
+    m.expiry_date,
+    DATEDIFF(m.expiry_date, CURDATE()) AS days_remaining,
+    sup.phone           AS supplier_phone,
+    CASE
+        WHEN m.expiry_date < CURDATE()                          THEN 'EXPIRED'
+        WHEN DATEDIFF(m.expiry_date, CURDATE()) <= 7            THEN 'EXPIRING IN 7 DAYS'
+        WHEN DATEDIFF(m.expiry_date, CURDATE()) <= 30           THEN 'EXPIRING IN 30 DAYS'
+    END                 AS urgency_level
+FROM medicines m
+JOIN stock     s   ON m.medicine_id  = s.medicine_id
+JOIN suppliers sup ON m.supplier_id  = sup.supplier_id
+WHERE m.expiry_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+ORDER BY m.expiry_date ASC;
