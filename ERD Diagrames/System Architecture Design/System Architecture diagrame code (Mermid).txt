@@ -1,0 +1,37 @@
+%%{init: {'theme': 'default'}}%%
+graph TD
+
+  subgraph Frontend ["Frontend Layer - React.js + Tailwind CSS"]
+    A["React App\n(Browser)"]
+    B["React Router\n(Navigation)"]
+    C["Axios\n(HTTP Calls)"]
+  end
+
+  subgraph Backend ["Backend Layer - Node.js + Express.js"]
+    D["Express Server\n(REST API)"]
+    E["API Routes\n/medicines /suppliers\n/orders /dispense"]
+    F["mysql2\n(DB Connector)"]
+  end
+
+  subgraph Database ["Database Layer - MySQL"]
+    G[("medicines")]
+    H[("stock")]
+    I[("suppliers")]
+    J[("prescriptions")]
+    K[("dispense_records")]
+    L[("purchase_orders")]
+  end
+
+  A --> B
+  A --> C
+  C -->|"HTTP Request"| D
+  D --> E
+  E --> F
+  F -->|"SQL Query"| G
+  F -->|"SQL Query"| H
+  F -->|"SQL Query"| I
+  F -->|"SQL Query"| J
+  F -->|"SQL Query"| K
+  F -->|"SQL Query"| L
+  G -->|"Result Set"| F
+  F -->|"JSON Response"| C
