@@ -1,0 +1,84 @@
+%%{init: {'theme': 'default'}}%%
+classDiagram
+
+  class Medicine {
+    +int medicine_id
+    +String name
+    +String dosage_form
+    +float unit_price
+    +Date expiry_date
+    +String batch_no
+    +addMedicine()
+    +updateMedicine()
+    +deleteMedicine()
+    +checkExpiry()
+  }
+
+  class Stock {
+    +int stock_id
+    +int quantity
+    +int low_stock_threshold
+    +updateStock()
+    +checkLowStock()
+    +getLowStockAlerts()
+  }
+
+  class Supplier {
+    +int supplier_id
+    +String company_name
+    +String contact_person
+    +String phone
+    +addSupplier()
+    +updateSupplier()
+  }
+
+  class PurchaseOrder {
+    +int order_id
+    +Date order_date
+    +String status
+    +createOrder()
+    +updateStatus()
+    +cancelOrder()
+  }
+
+  class Patient {
+    +int patient_id
+    +String name
+    +String phone
+    +Date dob
+    +addPatient()
+    +getHistory()
+  }
+
+  class Doctor {
+    +int doctor_id
+    +String name
+    +String specialization
+    +writePrescription()
+  }
+
+  class Prescription {
+    +int prescription_id
+    +Date prescribed_date
+    +String notes
+    +createPrescription()
+    +addItem()
+  }
+
+  class DispenseRecord {
+    +int dispense_id
+    +int quantity
+    +DateTime dispensed_at
+    +String dispensed_by
+    +dispenseMedicine()
+    +getHistory()
+  }
+
+  Medicine "1" --> "1" Stock : tracks
+  Medicine "1" --> "0..*" DispenseRecord : dispensed in
+  Supplier "1" --> "0..*" PurchaseOrder : receives
+  PurchaseOrder "1" --> "1..*" Medicine : includes
+  Patient "1" --> "0..*" Prescription : has
+  Doctor "1" --> "0..*" Prescription : writes
+  Prescription "1" --> "0..*" DispenseRecord : fulfilled by
+  Prescription "1" --> "1..*" Medicine : prescribes
