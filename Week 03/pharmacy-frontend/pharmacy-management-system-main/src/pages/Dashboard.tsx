@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getDashboardStats, getStockLevels, getRecentDispenses } from '../api/services';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, Area, AreaChart
@@ -67,40 +68,48 @@ function StatCard({ title, value, icon: Icon, color, trend, trendUp }: {
 }
 
 const expiryAlerts = [
-  { name: 'Brufen 400mg', badge: 'EXPIRED', badgeColor: '#DC2626', badgeBg: '#FEE2E2', days: '' },
-  { name: 'Ventolin Inhaler', badge: 'EXPIRED', badgeColor: '#DC2626', badgeBg: '#FEE2E2', days: '' },
-  { name: 'Disprin 300mg', badge: '3 days', badgeColor: '#D97706', badgeBg: '#FEF3C7', days: '' },
+  { name: 'Brufen 400mg',      badge: 'EXPIRED', badgeColor: '#DC2626', badgeBg: '#FEE2E2', days: '' },
+  { name: 'Ventolin Inhaler',  badge: 'EXPIRED', badgeColor: '#DC2626', badgeBg: '#FEE2E2', days: '' },
+  { name: 'Disprin 300mg',     badge: '3 days',  badgeColor: '#D97706', badgeBg: '#FEF3C7', days: '' },
   { name: 'Amoxicillin 250mg', badge: '18 days', badgeColor: '#CA8A04', badgeBg: '#FEF9C3', days: '' },
-  { name: 'Metformin 500mg', badge: '25 days', badgeColor: '#CA8A04', badgeBg: '#FEF9C3', days: '' },
+  { name: 'Metformin 500mg',   badge: '25 days', badgeColor: '#CA8A04', badgeBg: '#FEF9C3', days: '' },
   { name: 'Cough Syrup 100ml', badge: '28 days', badgeColor: '#CA8A04', badgeBg: '#FEF9C3', days: '' },
 ];
 
-const stockData = [
-  { name: 'Panadol', qty: 150 }, { name: 'Amoxicil.', qty: 8 }, { name: 'ORS', qty: 200 },
-  { name: 'Metformin', qty: 12 }, { name: 'Brufen', qty: 90 }, { name: 'Flagyl', qty: 75 },
-  { name: 'Vit C', qty: 300 }, { name: 'Ringer', qty: 60 }, { name: 'Cough Syr.', qty: 5 },
-  { name: 'Augmentin', qty: 45 }, { name: 'Lipitor', qty: 80 },
+// Fallback static data (used if API fails)
+const stockDataFallback = [
+  { name: 'Panadol',    qty: 150 }, { name: 'Amoxicil.', qty: 8   },
+  { name: 'ORS',        qty: 200 }, { name: 'Metformin', qty: 12  },
+  { name: 'Brufen',     qty: 90  }, { name: 'Flagyl',    qty: 75  },
+  { name: 'Vit C',      qty: 300 }, { name: 'Ringer',    qty: 60  },
+  { name: 'Cough Syr.', qty: 5   }, { name: 'Augmentin', qty: 45  },
+  { name: 'Lipitor',    qty: 80  },
 ];
 
 const pieData = [
-  { name: 'Tablet', value: 6 }, { name: 'Capsule', value: 2 }, { name: 'Syrup', value: 1 },
-  { name: 'Injection', value: 1 }, { name: 'Inhaler', value: 1 }, { name: 'Other', value: 4 },
+  { name: 'Tablet',    value: 6 }, { name: 'Capsule',   value: 2 },
+  { name: 'Syrup',     value: 1 }, { name: 'Injection', value: 1 },
+  { name: 'Inhaler',   value: 1 }, { name: 'Other',     value: 4 },
 ];
 
 const lineData = [
-  { month: 'Dec', dispenses: 18 }, { month: 'Jan', dispenses: 24 }, { month: 'Feb', dispenses: 20 },
-  { month: 'Mar', dispenses: 28 }, { month: 'Apr', dispenses: 22 }, { month: 'May', dispenses: 30 },
+  { month: 'Dec', dispenses: 18 }, { month: 'Jan', dispenses: 24 },
+  { month: 'Feb', dispenses: 20 }, { month: 'Mar', dispenses: 28 },
+  { month: 'Apr', dispenses: 22 }, { month: 'May', dispenses: 30 },
 ];
 
-const recentDispenses = [
-  { patient: 'Muhammad Ali', doctor: 'Dr. Ahmed Raza', medicine: 'Panadol 500mg', qty: 10, date: '28-Apr-26', by: 'M. Hussain' },
-  { patient: 'Zainab Bibi', doctor: 'Dr. Fatima Malik', medicine: 'Lipitor 20mg', qty: 30, date: '29-Apr-26', by: 'Ali Ahmed' },
-  { patient: 'Tariq Jameel', doctor: 'Dr. Usman Tariq', medicine: 'Augmentin 625mg', qty: 14, date: '30-Apr-26', by: 'M. Hussain' },
-  { patient: 'Ayesha Khan', doctor: 'Dr. Sadia Hussain', medicine: 'Metformin 500mg', qty: 30, date: '01-May-26', by: 'Ali Ahmed' },
-  { patient: 'Hassan Nawaz', doctor: 'Dr. Ahmed Raza', medicine: 'Cough Syrup 100ml', qty: 1, date: '02-May-26', by: 'M. Hussain' },
+// Fallback static dispenses (used if API fails)
+const recentDispensesFallback = [
+  { patient: 'Muhammad Ali',  doctor: 'Dr. Ahmed Raza',    medicine: 'Panadol 500mg',    qty: 10, date: '28-Apr-26', by: 'M. Hussain' },
+  { patient: 'Zainab Bibi',   doctor: 'Dr. Fatima Malik',  medicine: 'Lipitor 20mg',     qty: 30, date: '29-Apr-26', by: 'Ali Ahmed'  },
+  { patient: 'Tariq Jameel',  doctor: 'Dr. Usman Tariq',   medicine: 'Augmentin 625mg',  qty: 14, date: '30-Apr-26', by: 'M. Hussain' },
+  { patient: 'Ayesha Khan',   doctor: 'Dr. Sadia Hussain', medicine: 'Metformin 500mg',  qty: 30, date: '01-May-26', by: 'Ali Ahmed'  },
+  { patient: 'Hassan Nawaz',  doctor: 'Dr. Ahmed Raza',    medicine: 'Cough Syrup 100ml',qty: 1,  date: '02-May-26', by: 'M. Hussain' },
 ];
 
-const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) => {
+const CustomTooltip = ({ active, payload, label }: {
+  active?: boolean; payload?: { value: number }[]; label?: string
+}) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white dark:bg-[#1A1730] border border-gray-100 dark:border-[#2D2B45] rounded-lg px-3 py-2 shadow-lg text-xs">
@@ -114,16 +123,75 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
+
+  // ── Real MySQL data states ─────────────────────────────────────────────────
+  const [dbStats, setDbStats] = useState<{
+    total_medicines:   number;
+    expired_medicines: number;
+    low_stock_items:   number;
+    pending_orders:    number;
+  } | null>(null);
+
+  const [dbStockData, setDbStockData] = useState<
+    { name: string; qty: number }[]
+  >([]);
+
+  const [dbRecentDispenses, setDbRecentDispenses] = useState<{
+    patient_name:  string;
+    doctor_name:   string;
+    medicine_name: string;
+    quantity:      number;
+    dispensed_at:  string;
+    dispensed_by:  string;
+  }[]>([]);
+
+  // ── localStorage fallback states ───────────────────────────────────────────
   const { medicines, orders } = useData();
-  const lowStock = medicines.filter(m => m.status === 'Low Stock').length;
-  const expired = medicines.filter(m => m.status === 'Expired').length;
+  const lowStock      = medicines.filter(m => m.status === 'Low Stock').length;
+  const expired       = medicines.filter(m => m.status === 'Expired').length;
   const pendingOrders = orders.filter(o => o.status === 'Pending').length;
 
+  // ── Fetch real data from MySQL via API ─────────────────────────────────────
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(t);
+    const fetchData = async () => {
+      try {
+        const [statsRes, stockRes, dispensesRes] = await Promise.all([
+          getDashboardStats(),
+          getStockLevels(),
+          getRecentDispenses(),
+        ]);
+        setDbStats(statsRes.data);
+        setDbStockData(
+          stockRes.data.map((row: { name: string; quantity: number }) => ({
+            name: row.name.split(' ')[0],
+            qty:  row.quantity,
+          }))
+        );
+        setDbRecentDispenses(dispensesRes.data);
+      } catch (err) {
+        console.error('API error — using localStorage fallback', err);
+      } finally {
+        setTimeout(() => setLoading(false), 800);
+      }
+    };
+    fetchData();
   }, []);
 
+  // ── Build display rows for recent dispenses table ──────────────────────────
+  const displayDispenses = dbRecentDispenses.length
+    ? dbRecentDispenses.map(d => ({
+        patient:  d.patient_name,
+        doctor:   d.doctor_name,
+        medicine: d.medicine_name,
+        qty:      d.quantity,
+        date:     new Date(d.dispensed_at).toLocaleDateString('en-GB', {
+                    day: '2-digit', month: 'short', year: '2-digit'
+                  }),
+        by:       d.dispensed_by,
+      }))
+    : recentDispensesFallback;
+
+  // ── Loading skeleton ───────────────────────────────────────────────────────
   if (loading) {
     return (
       <div>
@@ -146,17 +214,39 @@ export default function Dashboard() {
 
   return (
     <div className="animate-in fade-in duration-300">
-      {/* Stats */}
+
+      {/* ── Stats Row ── */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
-        <StatCard title="Total Medicines" value={medicines.length} icon={Pill} color="#7C3AED" trend="+2 this month" trendUp={false} />
-        <StatCard title="Low Stock Alerts" value={lowStock} icon={AlertTriangle} color="#D97706" trend="+1 since yesterday" trendUp={true} />
-        <StatCard title="Expired Medicines" value={expired} icon={XCircle} color="#DC2626" trend="Needs immediate action" />
-        <StatCard title="Pending Orders" value={pendingOrders} icon={Clock} color="#2563EB" trend="Expected by May 12" />
+        <StatCard
+          title="Total Medicines"
+          value={dbStats?.total_medicines ?? medicines.length}
+          icon={Pill} color="#7C3AED"
+          trend="+2 this month" trendUp={false}
+        />
+        <StatCard
+          title="Low Stock Alerts"
+          value={dbStats?.low_stock_items ?? lowStock}
+          icon={AlertTriangle} color="#D97706"
+          trend="+1 since yesterday" trendUp={true}
+        />
+        <StatCard
+          title="Expired Medicines"
+          value={dbStats?.expired_medicines ?? expired}
+          icon={XCircle} color="#DC2626"
+          trend="Needs immediate action"
+        />
+        <StatCard
+          title="Pending Orders"
+          value={dbStats?.pending_orders ?? pendingOrders}
+          icon={Clock} color="#2563EB"
+          trend="Expected by May 12"
+        />
       </div>
 
-      {/* Charts Row 1 */}
+      {/* ── Charts Row 1 ── */}
       <div className="grid grid-cols-3 gap-5 mb-6">
-        {/* Bar chart */}
+
+        {/* Bar chart — real MySQL stock data */}
         <div className="col-span-2 bg-white dark:bg-[#1A1730] rounded-xl p-5 shadow-sm border border-transparent dark:border-[#2D2B45]"
           style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(124,58,237,0.06)' }}>
           <div className="mb-4">
@@ -164,7 +254,10 @@ export default function Dashboard() {
             <div className="text-xs text-gray-500 dark:text-gray-400">Current inventory levels across all medicines</div>
           </div>
           <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={stockData} margin={{ top: 5, right: 10, left: -10, bottom: 40 }}>
+            <BarChart
+              data={dbStockData.length ? dbStockData : stockDataFallback}
+              margin={{ top: 5, right: 10, left: -10, bottom: 40 }}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6B7280' }} angle={-35} textAnchor="end" interval={0} />
               <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} />
@@ -174,7 +267,7 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
 
-        {/* Expiry alerts */}
+        {/* Expiry alerts panel */}
         <div className="bg-white dark:bg-[#1A1730] rounded-xl p-5 shadow-sm border border-transparent dark:border-[#2D2B45]"
           style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(124,58,237,0.06)' }}>
           <div className="flex items-center gap-2 mb-4">
@@ -192,14 +285,16 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-          <Link to="/expiry-alerts" className="mt-4 flex items-center gap-1 text-xs font-medium text-[#7C3AED] hover:text-[#5B21B6] transition-colors">
+          <Link to="/expiry-alerts"
+            className="mt-4 flex items-center gap-1 text-xs font-medium text-[#7C3AED] hover:text-[#5B21B6] transition-colors">
             <Eye size={12} /> View All Alerts
           </Link>
         </div>
       </div>
 
-      {/* Charts Row 2 */}
+      {/* ── Charts Row 2 ── */}
       <div className="grid grid-cols-2 gap-5 mb-6">
+
         {/* Pie chart */}
         <div className="bg-white dark:bg-[#1A1730] rounded-xl p-5 shadow-sm border border-transparent dark:border-[#2D2B45]"
           style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(124,58,237,0.06)' }}>
@@ -231,8 +326,8 @@ export default function Dashboard() {
             <AreaChart data={lineData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
               <defs>
                 <linearGradient id="dispenseGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#7C3AED" stopOpacity={0} />
+                  <stop offset="5%"  stopColor="#7C3AED" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#7C3AED" stopOpacity={0}    />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
@@ -246,12 +341,13 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Recent Dispense Table */}
+      {/* ── Recent Dispense Table — real MySQL data ── */}
       <div className="bg-white dark:bg-[#1A1730] rounded-xl shadow-sm border border-transparent dark:border-[#2D2B45] overflow-hidden"
         style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(124,58,237,0.06)' }}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50 dark:border-[#2D2B45]">
           <div className="text-base font-semibold text-gray-900 dark:text-white">Recent Dispense Records</div>
-          <Link to="/prescriptions" className="text-xs font-medium text-[#7C3AED] hover:text-[#5B21B6] transition-colors">
+          <Link to="/prescriptions"
+            className="text-xs font-medium text-[#7C3AED] hover:text-[#5B21B6] transition-colors">
             View All
           </Link>
         </div>
@@ -267,7 +363,7 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {recentDispenses.map((row, i) => (
+              {displayDispenses.map((row, i) => (
                 <tr key={i}
                   className="border-t border-gray-50 dark:border-[#2D2B45] hover:bg-[#FAF5FF] dark:hover:bg-[#252240] transition-colors"
                   style={{ background: i % 2 === 1 ? 'rgba(245,243,255,0.5)' : 'transparent' }}>
@@ -279,7 +375,8 @@ export default function Dashboard() {
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{row.date}</td>
                   <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{row.by}</td>
                   <td className="px-4 py-3">
-                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full" style={{ background: '#DCFCE7', color: '#166534' }}>
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full"
+                      style={{ background: '#DCFCE7', color: '#166534' }}>
                       Completed
                     </span>
                   </td>
@@ -289,6 +386,7 @@ export default function Dashboard() {
           </table>
         </div>
       </div>
+
     </div>
   );
 }
