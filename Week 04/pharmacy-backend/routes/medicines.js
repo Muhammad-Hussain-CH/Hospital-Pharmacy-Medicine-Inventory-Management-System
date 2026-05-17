@@ -62,38 +62,80 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/medicines — add new medicine
+// POST /api/medicines — add new medicine
 router.post('/', async (req, res) => {
-  const { 
-    category_id, manufacturer_id, supplier_id, name,
-    dosage_form, strength, unit_price, expiry_date, 
-    batch_no, description, stock_quantity, low_stock_threshold 
+  console.log('📥 Received POST /api/medicines body:', req.body);
+
+  const {
+    category_id,
+    manufacturer_id,
+    supplier_id,
+    name,
+    dosage_form,
+    strength,
+    unit_price,
+    expiry_date,
+    batch_no,
+    description,
+    stock_quantity,
+    low_stock_threshold
   } = req.body;
+
+  // Validate required fields
+  if (!name || !unit_price || !expiry_date || !batch_no) {
+    return res.status(400).json({
+      error: 'Missing required fields: name, unit_price, expiry_date, batch_no'
+    });
+  }
+
+  // Make sure IDs are valid numbers — default to 1 if missing
+  const catId  = Number(category_id)     || 1;
+  const mfrId  = Number(manufacturer_id) || 1;
+  const supId  = Number(supplier_id)     || 1;
+  const qty    = Number(stock_quantity)  || 0;
+  const thresh = Number(low_stock_threshold) || 20;
+
+  console.log('🔢 Parsed IDs:', { catId, mfrId, supId, qty, thresh });
 
   const conn = await db.getConnection();
   try {
     await conn.beginTransaction();
 
     const [result] = await conn.query(`
-      INSERT INTO medicines 
-        (category_id, manufacturer_id, supplier_id, name, dosage_form, 
-         strength, unit_price, expiry_date, batch_no, description)
+      INSERT INTO medicines
+        (category_id, manufacturer_id, supplier_id, name,
+         dosage_form, strength, unit_price, expiry_date,
+         batch_no, description)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [category_id, manufacturer_id, supplier_id, name, dosage_form,
-        strength, unit_price, expiry_date, batch_no, description]);
+    `, [catId, mfrId, supId, name, dosage_form || 'Tablet',
+        strength || '', unit_price, expiry_date,
+        batch_no, description || '']);
+
+    const newMedicineId = result.insertId;
+    console.log('✅ Medicine inserted with ID:', newMedicineId);
 
     await conn.query(`
       INSERT INTO stock (medicine_id, quantity, low_stock_threshold)
       VALUES (?, ?, ?)
-    `, [result.insertId, stock_quantity || 0, low_stock_threshold || 20]);
+    `, [newMedicineId, qty, thresh]);
+
+    console.log('✅ Stock record inserted');
 
     await conn.commit();
-    res.status(201).json({ 
-      message: 'Medicine added successfully', 
-      medicine_id: result.insertId 
+    res.status(201).json({
+      message: 'Medicine added successfully',
+      medicine_id: newMedicineId
     });
   } catch (err) {
     await conn.rollback();
-    res.status(500).json({ error: err.message });
+    console.error('❌ POST /api/medicines error:', err.message);
+    console.error('❌ SQL State:', err.sqlState);
+    console.error('❌ SQL Message:', err.sqlMessage);
+    res.status(500).json({
+      error: err.message,
+      sqlMessage: err.sqlMessage,
+      sqlState: err.sqlState
+    });
   } finally {
     conn.release();
   }
