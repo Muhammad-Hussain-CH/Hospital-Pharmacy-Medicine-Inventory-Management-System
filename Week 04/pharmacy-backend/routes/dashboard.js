@@ -45,14 +45,25 @@ router.get('/stats', async (req, res) => {
 router.get('/stock-levels', async (req, res) => {
   try {
     const [rows] = await db.query(`
-      SELECT m.name, s.quantity
+      SELECT 
+        m.medicine_id,
+        m.name        AS name,
+        m.expiry_date,
+        s.quantity    AS qty,
+        s.low_stock_threshold,
+        CASE
+          WHEN m.expiry_date < CURDATE()            THEN 'Expired'
+          WHEN s.quantity = 0                        THEN 'Out of Stock'
+          WHEN s.quantity < s.low_stock_threshold    THEN 'Low Stock'
+          ELSE                                            'In Stock'
+        END AS status
       FROM medicines m
       JOIN stock s ON m.medicine_id = s.medicine_id
       ORDER BY s.quantity DESC
-      LIMIT 11
     `);
     res.json(rows);
   } catch (err) {
+    console.error('Stock levels error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });

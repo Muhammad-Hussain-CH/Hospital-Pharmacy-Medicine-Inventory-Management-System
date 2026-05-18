@@ -1,0 +1,104 @@
+﻿node.exe : npm verbose cli G:\Nodejs\node.exe 
+G:\Nodejs\node_modules\npm\bin\npm-cli.js
+At line:1 char:1
++ & "G:\Nodejs/node.exe" "G:\Nodejs/node_modules/npm/bin/npm-cli.js" in ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm verbose cli...\bin\npm-cli.js:S 
+   tring) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+npm info using npm@11.12.1
+npm info using node@v25.9.0
+npm verbose title npm install
+npm verbose argv "install" "--loglevel" "verbose"
+npm verbose logfile logs-max:10 
+dir:C:\Users\hussa\AppData\Local\npm-cache\_logs\2026-05-11T18_24_25_552Z-
+npm verbose logfile 
+C:\Users\hussa\AppData\Local\npm-cache\_logs\2026-05-11T18_24_25_552Z-debug-0.log
+npm http fetch POST 200 
+https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 4589ms
+npm http fetch GET 200 https://registry.npmjs.org/minimatch 868ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/vite 948ms (cache revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/js-yaml 1519ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/cross-spawn 1530ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/nanoid 1662ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/esbuild 1787ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/glob 1858ms (cache revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/ajv 1871ms (cache revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/postcss 2001ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/rollup 2327ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/picomatch 2791ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/yaml 2753ms (cache revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/flatted 2844ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/@babel%2fhelpers 2863ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/@eslint%2fplugin-kit 3111ms 
+(cache revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/brace-expansion 39608ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/@babel%2fcore 134ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/eslint 413ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/@eslint%2feslintrc 293ms 
+(cache revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/@eslint%2fconfig-array 553ms 
+(cache revalidated)
+npm http fetch GET 200 
+https://registry.npmjs.org/@typescript-eslint%2ftypescript-estree 565ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/foreground-child 429ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/flat-cache 92ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/sucrase 905ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/micromatch 89ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/anymatch 486ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/readdirp 1508ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/postcss-load-config 308ms 
+(cache revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/autoprefixer 321ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/postcss-import 565ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/postcss-nested 663ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/postcss-js 729ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/tailwindcss 1164ms (cache 
+revalidated)
+npm http fetch GET 200 https://registry.npmjs.org/@vitejs%2fplugin-react 504ms 
+(cache revalidated)
+
+up to date, audited 333 packages in 58s
+
+68 packages are looking for funding
+  run `npm fund` for details
+
+16 vulnerabilities (1 low, 9 moderate, 6 high)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+npm verbose cwd E:\BUKC-4SE\Database Management Systems 
+Lab\Hospital-Pharmacy-Medicine-Inventory-Management-System\Week 
+03\pharmacy-frontend\pharmacy-management-system-main
+npm verbose os Windows_NT 10.0.19045
+npm verbose node v25.9.0
+npm verbose npm  v11.12.1
+npm verbose exit 0
+npm info ok
