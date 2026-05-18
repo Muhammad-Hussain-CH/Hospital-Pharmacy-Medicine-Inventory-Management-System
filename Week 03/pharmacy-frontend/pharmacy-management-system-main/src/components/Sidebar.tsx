@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import {
   LayoutDashboard, Pill, Truck, ShoppingCart,
   ClipboardList, AlertTriangle, BarChart2, Settings, LogOut, Cross
@@ -26,15 +27,29 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="px-6 py-6">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#7C3AED] flex items-center justify-center">
-            <Cross size={18} className="text-white" />
-          </div>
+          {/** Try to load a project logo at /logo.png (place in frontend public/). Falls back to icon. */}
+          <LogoArea />
           <div>
             <div className="text-white font-bold text-base leading-tight">PharmaCare</div>
             <div className="text-[11px] leading-tight" style={{ color: '#C4B5FD' }}>Hospital Management System</div>
           </div>
         </div>
       </div>
+
+function LogoArea() {
+  const [err, setErr] = useState(false);
+  return (
+    <div className="w-9 h-9 rounded-xl bg-[#7C3AED] flex items-center justify-center overflow-hidden">
+      {!err ? (
+        <img src="/logo.png" alt="PharmaCare" className="w-full h-full object-cover" onError={() => setErr(true)} />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          <Cross size={18} className="text-white" />
+        </div>
+      )}
+    </div>
+  );
+}
 
       {/* Nav */}
       <nav className="flex-1 px-2 pb-4 overflow-y-auto">
