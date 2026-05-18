@@ -78,12 +78,17 @@ const expiryAlerts = [
 
 // Fallback static data (used if API fails)
 const stockDataFallback = [
-  { name: 'Panadol',    qty: 150 }, { name: 'Amoxicil.', qty: 8   },
-  { name: 'ORS',        qty: 200 }, { name: 'Metformin', qty: 12  },
-  { name: 'Brufen',     qty: 90  }, { name: 'Flagyl',    qty: 75  },
-  { name: 'Vit C',      qty: 300 }, { name: 'Ringer',    qty: 60  },
-  { name: 'Cough Syr.', qty: 5   }, { name: 'Augmentin', qty: 45  },
-  { name: 'Lipitor',    qty: 80  },
+  { name: 'Panadol',    qty: 150, status: 'In Stock'  },
+  { name: 'Amoxicil.',  qty: 8,   status: 'Low Stock'  },
+  { name: 'ORS',        qty: 200, status: 'In Stock'  },
+  { name: 'Metformin',  qty: 12,  status: 'Low Stock'  },
+  { name: 'Brufen',     qty: 90,  status: 'Expired'   },
+  { name: 'Flagyl',     qty: 75,  status: 'In Stock'  },
+  { name: 'Vit C',      qty: 300, status: 'In Stock'  },
+  { name: 'Ringer',     qty: 60,  status: 'In Stock'  },
+  { name: 'Cough Syr.', qty: 5,   status: 'Low Stock'  },
+  { name: 'Augmentin',  qty: 45,  status: 'In Stock'  },
+  { name: 'Lipitor',    qty: 80,  status: 'In Stock'  },
 ];
 
 const pieData = [
@@ -108,13 +113,22 @@ const recentDispensesFallback = [
 ];
 
 const CustomTooltip = ({ active, payload, label }: {
-  active?: boolean; payload?: { value: number }[]; label?: string
+  active?: boolean;
+  payload?: { value: number; payload: { status?: string } }[];
+  label?: string;
 }) => {
   if (active && payload && payload.length) {
+    const status = payload[0].payload?.status ?? '';
+    const color  =
+      status === 'Expired'      ? '#DC2626' :
+      status === 'Low Stock'    ? '#D97706' :
+      status === 'Out of Stock' ? '#6B7280' :
+                                  '#7C3AED';
     return (
       <div className="bg-white dark:bg-[#1A1730] border border-gray-100 dark:border-[#2D2B45] rounded-lg px-3 py-2 shadow-lg text-xs">
         <div className="font-semibold text-gray-800 dark:text-white">{label}</div>
-        <div className="text-[#7C3AED]">Stock: {payload[0].value} units</div>
+        <div style={{ color }}>Stock: {payload[0].value} units</div>
+        <div style={{ color }} className="font-medium">{status}</div>
       </div>
     );
   }
@@ -133,7 +147,7 @@ export default function Dashboard() {
   } | null>(null);
 
   const [dbStockData, setDbStockData] = useState<
-    { name: string; qty: number }[]
+    { name: string; qty: number; status: string }[]
   >([]);
 
   const [dbRecentDispenses, setDbRecentDispenses] = useState<{
@@ -162,9 +176,10 @@ export default function Dashboard() {
         ]);
         setDbStats(statsRes.data);
         setDbStockData(
-          stockRes.data.map((row: { name: string; quantity: number }) => ({
+          stockRes.data.map((row: { name: string; qty: number; status: string }) => ({
             name: row.name.split(' ')[0],
-            qty:  row.quantity,
+            qty:  Number(row.qty),
+            status: row.status,
           }))
         );
         setDbRecentDispenses(dispensesRes.data);
@@ -262,7 +277,23 @@ export default function Dashboard() {
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6B7280' }} angle={-35} textAnchor="end" interval={0} />
               <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="qty" fill="#7C3AED" radius={[4, 4, 0, 0]} animationDuration={1200} animationEasing="ease-in-out" />
+              <Bar
+                dataKey="qty"
+                radius={[4, 4, 0, 0]}
+                animationDuration={1200}
+                animationEasing="ease-in-out">
+                {(dbStockData.length ? dbStockData : stockDataFallback).map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={
+                      entry.status === 'Expired'      ? '#DC2626' :
+                      entry.status === 'Low Stock'    ? '#D97706' :
+                      entry.status === 'Out of Stock' ? '#6B7280' :
+                                                        '#7C3AED'
+                    }
+                  />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
