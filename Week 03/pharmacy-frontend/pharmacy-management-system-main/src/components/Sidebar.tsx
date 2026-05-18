@@ -16,6 +16,21 @@ const navItems = [
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
+function LogoArea() {
+  const [err, setErr] = useState(false);
+  return (
+    <div className="w-9 h-9 rounded-xl bg-[#7C3AED] flex items-center justify-center overflow-hidden">
+      {!err ? (
+        <img src="/logo.png" alt="PharmaCare" className="w-full h-full object-cover" onError={() => setErr(true)} />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          <Cross size={18} className="text-white" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Sidebar() {
   const location = useLocation();
 
@@ -35,22 +50,6 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
-
-function LogoArea() {
-  const [err, setErr] = useState(false);
-  return (
-    <div className="w-9 h-9 rounded-xl bg-[#7C3AED] flex items-center justify-center overflow-hidden">
-      {!err ? (
-        <img src="/logo.png" alt="PharmaCare" className="w-full h-full object-cover" onError={() => setErr(true)} />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          <Cross size={18} className="text-white" />
-        </div>
-      )}
-    </div>
-  );
-}
-
       {/* Nav */}
       <nav className="flex-1 px-2 pb-4 overflow-y-auto">
         <div className="text-[10px] uppercase tracking-widest font-semibold px-3 mb-2" style={{ color: '#6D5BA6' }}>
