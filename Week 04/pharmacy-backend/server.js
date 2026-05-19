@@ -4,8 +4,19 @@ require('dotenv').config();
 
 const app = express();
 
+app.get('/', (req, res) => {
+  res.send('Pharmacare Backend is Running Successfully 🚀');
+});
+
 // ── Middleware ────────────────────────────────
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://pharmacare.vercel.app',
+    /\.vercel\.app$/
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 // ── Routes ────────────────────────────────────
